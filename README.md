@@ -15,8 +15,13 @@ opravdu zkontrolují, než vjedou.
   co z toho plyne pro řidiče spalovacího vozu, plus týdenní mřížka. Žádné SPZ, žádná jména.
 - **Rezervace po přihlášení** — jen pro řidiče na seznamu, jen firemní elektromobily,
   jeden den nebo celý pracovní týden. Rezervace je celodenní.
+- **Rezervace klikem v mřížce** — přihlášený řidič klikne na volné stání a je zarezervováno;
+  klik na vlastní rezervaci ji po potvrzení zruší. Cizí rezervace ani stání mimo provoz
+  klikatelné nejsou.
 - **Přihlášení e-mailem a heslem**, které přiděluje správce. Samoobslužná registrace je
   vypnutá, uživatel si přidělené heslo může změnit v aplikaci.
+- **Nahlášení obsazeného stání** — tlačítko v panelu „Dnes" založí záznam do evidence
+  porušení a pošle mail správci. Bez evidence je sankce s chipem nevymahatelná.
 - **Ochrana proti dvojité rezervaci** na úrovni databáze (částečný unikátní index),
   ne jen kontrolou ve formuláři.
 - **Demo režim** — bez vyplněné konfigurace běží aplikace s ukázkovými daty v paměti.

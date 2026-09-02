@@ -18,6 +18,11 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  // Hranice, za kterou se mřížka otáčí a popisky zkracují.
+  // Stejná hodnota je i v styles.css — když se mění, mění se na obou místech.
+  var UZKY = window.matchMedia('(max-width: 620px)');
+  function jeUzky() { return UZKY.matches; }
+
   /* ---------------- Načtení a překreslení ---------------- */
 
   function nacti() {
@@ -45,8 +50,9 @@
     var dnesek = util.dnes();
     var dny = util.tyden(stav.pondeli);
 
+    var uzky = jeUzky();
     $('todayDate').textContent = util.dlouhyDen(dnesek);
-    ui.dlazdice($('tiles'), stav.mista, stav.rezervace, dnesek);
+    ui.dlazdice($('tiles'), stav.mista, stav.rezervace, dnesek, uzky);
 
     var v = ui.verdikt(stav.mista, stav.rezervace, dnesek);
     var vEl = $('todayVerdict');
@@ -59,6 +65,7 @@
     ui.mrizka($('grid'), dny, stav.mista, stav.rezervace, {
       email: stav.uzivatel ? stav.uzivatel.email : null,
       vikendy: cfg.POVOLIT_VIKENDY,
+      uzky: uzky,
       onKlik: stav.uzivatel ? klikNaBunku : null
     });
 
@@ -427,6 +434,13 @@
     $('footMode').textContent = data.jeDemo
       ? 'Demo režim — data jsou pouze ukázková a neukládají se'
       : 'Připojeno k Supabase';
+
+    // Otočení mřížky při změně šířky (otočení telefonu, změna okna)
+    if (UZKY.addEventListener) {
+      UZKY.addEventListener('change', function () { if (stav.mista.length) vykresli(); });
+    } else if (UZKY.addListener) {
+      UZKY.addListener(function () { if (stav.mista.length) vykresli(); });
+    }
 
     data.naZmenuPrihlaseni(function () {
       data.nactiUzivatele().then(function (u) { stav.uzivatel = u; nacti(); });

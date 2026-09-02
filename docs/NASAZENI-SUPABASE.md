@@ -192,6 +192,7 @@ další nálezy. Po správném nasazení tam nemá být nic k tabulkám tohoto s
 | **Odebrat řidiče** | `ridici` → `aktivni = false`. Historie rezervací zůstane. |
 | **Přidat vozidlo** | `vozidla` → Insert. Vyřazené vozidlo `aktivni = false`, nemazat. |
 | **Stání mimo provoz** | `mista` → `aktivni = false`. Zmizí z nabídky i z dlaždic jako „Mimo provoz". |
+| **Vyřídit nahlášené porušení** | `poruseni` → přečíst záznam, po vyřešení `reseno = true`. Podklad pro odebrání chipu. |
 | **Zrušit cizí rezervaci** | `rezervace` → `stav = 'zrusena'`. Nemazat — historie je doklad. |
 | **Záloha** | Free plán nemá automatické zálohy. Jednou za čas Table Editor → `rezervace` → Export CSV, nebo `pg_dump` s heslem z kroku 1. |
 
@@ -253,7 +254,16 @@ Tabulka `drzitele_cipu`. Naplňte ji v `seed.sql` nebo přes Table Editor. Do je
 odeslání jdou všechny aktivní adresy najednou, takže jedna rezervace spotřebuje
 **jeden request**, ne jeden na osobu.
 
-### 11.4 Limity a čeho se držet
+### 11.4 Hlášení o obsazeném stání
+
+Stejná šablona obsluhuje i tlačítko **Stání někdo obsadil** v panelu „Dnes". Adresáty jsou
+řidiči s příznakem `spravce = true` v tabulce `ridici` — mějte tam aspoň jednoho, jinak
+hlášení skončí jen v evidenci `poruseni` a nikdo se o něm nedozví.
+
+Záznam se uloží vždy, i když mail neodejde; aplikace v takovém případě napíše, že je
+potřeba dát správci vědět jinak.
+
+### 11.5 Limity a čeho se držet
 
 - Free plán EmailJS: **200 požadavků měsíčně**, 2 šablony, tělo do 50 kB.
   Při běžném provozu (pár rezervací denně) to vystačí; kdyby ne, placený tarif je levný.
@@ -262,7 +272,7 @@ odeslání jdou všechny aktivní adresy najednou, takže jedna rezervace spotř
 - Když odeslání selže, **rezervace zůstává platná** — aplikace to napíše do hlášky
   a nechá na řidiči, aby dal kolegům vědět jinak.
 
-### 11.5 Co takhle nepůjde
+### 11.6 Co takhle nepůjde
 
 **Ranní souhrn v 6:00** nebo **upozornění na zrušení, když je zrušeno automaticky** —
 tam nikdo prohlížeč otevřený nemá. Když je budete chtít, potřebujete něco, co běží samo:

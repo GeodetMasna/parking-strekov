@@ -347,11 +347,67 @@ h3.sub { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
 .dlg-in p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 16px; }
 .dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 
-@media (max-width: 560px) {
-  .topbar-in { flex-direction: column; align-items: flex-start; }
-  .auth { justify-content: flex-start; }
-  .today, .board, .panel { padding: 16px; }
+/* =============================================================
+   Mobil — hranice 620 px odpovídá konstantě UZKY v app.js.
+   Hlavní scénář je řidič u závory: potřebuje jednu větu o dnešku
+   a celý týden bez posouvání do stran.
+   ============================================================= */
+@media (max-width: 620px) {
+  .page { padding: 16px 12px 48px; }
+  .today, .board, .panel, .rules { padding: 16px 14px; }
+  section { margin-bottom: 20px; }
   h1 { font-size: 22px; }
+  h2 { font-size: 17px; }
+
+  /* Závěr o dnešku patří nad dlaždice — je to to, proč sem člověk přišel */
+  .today { display: flex; flex-direction: column; }
+  .today-head { order: 1; }
+  .today-verdict { order: 2; margin: 12px 0 0; font-size: 16px; }
+  .tiles { order: 3; margin-top: 14px; }
+  .today-actions { order: 4; }
+  .today-lead { display: none; }   /* totéž říká závěr, jen delší cestou */
+
+  /* Čtyři stání do jedné řady, jen kód a stav */
+  .tiles { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .tile { padding: 8px 6px; min-height: 0; border-top-width: 3px; }
+  .tile-kod { font-size: 10.5px; letter-spacing: .06em; }
+  .tile-stav { font-size: 14px; line-height: 1.15; }
+  .tile-detail { font-size: 9.5px; margin-top: 4px; word-break: break-all; }
+
+  /* Otočená mřížka: dny v řádcích, stání ve sloupcích — vejde se celý týden */
+  .grid--otocena { grid-template-columns: 46px repeat(4, 1fr); min-width: 0; gap: 3px; }
+  .grid--otocena .cell { min-height: 42px; padding: 5px 3px; text-align: center; }
+  .grid--otocena .cell b { font-size: 11px; }
+  .grid--otocena .cell small { font-size: 9px; }
+  .grid--otocena .g-row { font-size: 11px; justify-content: flex-start; }
+  .grid--otocena .g-row.g-dnes { color: var(--accent); }
+  .grid--otocena .g-hd { font-size: 10px; padding-bottom: 4px; }
+
+  .board-head { gap: 10px; }
+  .weeknav { width: 100%; }
+  .weeknav .btn:nth-child(2) { flex: 1; }
+  .legend { gap: 6px 14px; font-size: 10px; }
+
+  /* Formulář: dvě pole vedle sebe, tlačítko přes celou šířku */
+  .form { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form .btn-primary { grid-column: 1 / -1; padding: 12px; font-size: 15px; }
+  .field select, .field input { min-height: 44px; }  /* pohodlný cíl pro prst */
+
+  .topbar-in { padding: 10px 14px; gap: 10px; }
+  .brand-sub { display: none; }   /* podtitul je na mobilu jen šum */
+  .brand-mark { width: 30px; height: 30px; font-size: 17px; }
+  .auth { gap: 6px; }
+  .auth-user { font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .dlg-in { padding: 18px 16px; }
+  .foot { padding: 14px 14px 32px; }
+}
+
+/* Velmi úzké displeje (360 px a méně) */
+@media (max-width: 380px) {
+  .tile-stav { font-size: 13px; }
+  .grid--otocena { grid-template-columns: 42px repeat(4, 1fr); }
+  .grid--otocena .cell b { font-size: 10.5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
