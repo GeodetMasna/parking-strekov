@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Parkování Střekov — nabíjecí stání</title>
+  <meta name="description" content="Obsazenost nabíjecích stání za závorou na centrále Střekov. Před vjezdem zkontrolujte, zda na dnešek není rezervace.">
+  <meta name="color-scheme" content="light dark">
+  <!-- Písma i knihovny jsou součástí webu. Nic se nestahuje z cizích domén,
+       aby aplikace fungovala i ve firemní síti s blokovanými CDN. -->
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <div>
+        <div class="brand-name">Parkování Střekov</div>
+        <div class="brand-sub">nabíjecí stání za závorou</div>
+      </div>
+    </div>
+    <div class="auth" id="auth">
+      <button class="btn btn-ghost" id="btnPrihlasit" type="button">Přihlásit se</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ---------- DNES: hlavní odpověď u závory ---------- -->
+  <section class="today" aria-labelledby="todayTitle">
+    <div class="today-head">
+      <h1 id="todayTitle">Dnes</h1>
+      <p class="today-date" id="todayDate">—</p>
+    </div>
+    <p class="today-lead">Řidiči vozidel se spalovacím motorem smí zaparkovat pouze na stání, které dnes <strong>nemá rezervaci</strong>.</p>
+    <div class="tiles" id="tiles" role="list" aria-label="Stav stání dnes"></div>
+    <p class="today-verdict" id="todayVerdict">—</p>
+  </section>
+
+  <!-- ---------- TÝDENNÍ MŘÍŽKA ---------- -->
+  <section class="board" aria-labelledby="weekTitle">
+    <div class="board-head">
+      <div>
+        <h2 id="weekTitle">Týdenní přehled</h2>
+        <p class="board-range" id="weekRange">—</p>
+      </div>
+      <div class="weeknav">
+        <button class="btn btn-ghost" id="btnPrev" type="button" aria-label="Předchozí týden">‹</button>
+        <button class="btn btn-ghost" id="btnToday" type="button">Tento týden</button>
+        <button class="btn btn-ghost" id="btnNext" type="button" aria-label="Následující týden">›</button>
+      </div>
+    </div>
+    <div class="grid-scroll">
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="legend">
+      <span><i class="lg lg-free"></i>Volné — spalovací vůz smí stát</span>
+      <span><i class="lg lg-res"></i>Rezervováno — jen uvedené vozidlo</span>
+      <span><i class="lg lg-off"></i>Mimo provoz</span>
+    </div>
+  </section>
+
+  <!-- ---------- REZERVACE (jen po přihlášení) ---------- -->
+  <section class="panel" id="panelRezervace" hidden aria-labelledby="resTitle">
+    <h2 id="resTitle">Nová rezervace</h2>
+    <p class="panel-lead">Rezervovat lze pouze firemní elektromobil. Rezervace je celodenní.</p>
+    <form class="form" id="formRezervace">
+      <label class="field">
+        <span>Vozidlo</span>
+        <select id="selVozidlo" required></select>
+      </label>
+      <label class="field">
+        <span>Stání</span>
+        <select id="selMisto" required></select>
+      </label>
+      <label class="field">
+        <span>Od data</span>
+        <input type="date" id="inpDatum" required>
+      </label>
+      <label class="field">
+        <span>Rozsah</span>
+        <select id="selRozsah">
+          <option value="1">Jeden den</option>
+          <option value="5">Celý pracovní týden (5 dnů)</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" type="submit">Rezervovat</button>
+    </form>
+    <p class="msg" id="msgRezervace" role="status"></p>
+
+    <h3 class="sub">Moje rezervace</h3>
+    <div id="mojeRezervace" class="mine"></div>
+  </section>
+
+  <!-- ---------- PRAVIDLA ---------- -->
+  <section class="rules" aria-labelledby="rulesTitle">
+    <h2 id="rulesTitle">Pravidla</h2>
+    <ol class="rulelist">
+      <li>Rezervace stání je možná <strong>výhradně pro firemní elektromobily</strong> a vždy předem.</li>
+      <li>Vozidlo se spalovacím motorem si stání <strong>rezervovat nemůže</strong>. Zaparkovat smí jen tehdy, není-li na daný den evidována rezervace daného stání.</li>
+      <li>Držitel chipu je povinen <strong>před každým vjezdem</strong> ověřit obsazenost na této stránce.</li>
+      <li>Každé jednotlivé porušení znamená <strong>okamžité odevzdání chipu</strong> od závory.</li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>STRABAG Rail · centrála Střekov</span>
+  <span id="footMode">—</span>
+</footer>
+
+<!-- Přihlašovací dialog -->
+<dialog id="dlgLogin" class="dlg">
+  <form method="dialog" class="dlg-in" id="formLogin">
+    <h2>Přihlášení řidiče</h2>
+    <p>Přihlaste se firemním e-mailem a heslem, které vám přidělil správce parkoviště.</p>
+    <label class="field">
+      <span>Firemní e-mail</span>
+      <input type="email" id="inpEmail" required autocomplete="username" placeholder="jmeno.prijmeni@strabag.com">
+    </label>
+    <label class="field">
+      <span>Heslo</span>
+      <input type="password" id="inpHeslo" required autocomplete="current-password">
+    </label>
+    <p class="msg" id="msgLogin" role="status"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Zavřít</button>
+      <button class="btn btn-primary" id="btnOdeslat" type="button">Přihlásit se</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Změna hesla -->
+<dialog id="dlgHeslo" class="dlg">
+  <form method="dialog" class="dlg-in" id="formHeslo">
+    <h2>Změna hesla</h2>
+    <p>Zadejte nové heslo. Přidělené heslo si takto můžete nahradit vlastním.</p>
+    <label class="field">
+      <span>Nové heslo</span>
+      <input type="password" id="inpNoveHeslo" required autocomplete="new-password" minlength="8">
+    </label>
+    <label class="field">
+      <span>Nové heslo znovu</span>
+      <input type="password" id="inpNoveHeslo2" required autocomplete="new-password" minlength="8">
+    </label>
+    <p class="msg" id="msgHeslo" role="status"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Zavřít</button>
+      <button class="btn btn-primary" id="btnUlozHeslo" type="button">Uložit</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="assets/vendor/supabase.js"></script>
+<script src="assets/vendor/email.min.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/util.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/notify.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

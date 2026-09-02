@@ -1,0 +1,344 @@
+/* =============================================================
+   Parkování Střekov — vzhled
+   Písma se načítají z assets/fonts.css (lokálně, bez CDN).
+   Světlý i tmavý režim podle nastavení zařízení.
+   Barvy stavů jsou záměrně jiné než firemní akcent, aby
+   "volno / obsazeno / mimo provoz" šlo přečíst na první pohled.
+   ============================================================= */
+
+:root {
+  --ground: #F2F4F7;
+  --surface: #FFFFFF;
+  --surface-2: #E9EDF3;
+  --ink: #12171E;
+  --ink-2: #3D4855;
+  --muted: #6B7686;
+  --line: #D6DDE6;
+  --line-strong: #B7C2CF;
+  --accent: #14539A;
+  --accent-ink: #FFFFFF;
+  --hold: #8A5606;
+  --hold-bg: #FBEFD8;
+  --hold-line: #D79B23;
+  --free: #216044;
+  --free-bg: #E0F0E7;
+  --free-line: #3E8F63;
+  --stop: #97231B;
+  --stop-bg: #FAE4E2;
+  --shadow: 0 1px 2px rgba(18,23,30,.06), 0 10px 26px -18px rgba(18,23,30,.35);
+  --radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E1319;
+    --surface: #161C25;
+    --surface-2: #1E2631;
+    --ink: #E6EBF2;
+    --ink-2: #B3BECC;
+    --muted: #7F8B9B;
+    --line: #28313D;
+    --line-strong: #3A4655;
+    --accent: #74A9E8;
+    --accent-ink: #0E1319;
+    --hold: #E7B45C;
+    --hold-bg: #33280F;
+    --hold-line: #8A6A22;
+    --free: #74C99A;
+    --free-bg: #12301F;
+    --free-line: #2F6B48;
+    --stop: #F09189;
+    --stop-bg: #3A1815;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px -20px rgba(0,0,0,.9);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- Horní lišta ---------------- */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar-in {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: 19px;
+  border-radius: var(--radius);
+  flex: none;
+}
+.brand-name { font-weight: 600; font-size: 16px; letter-spacing: -0.01em; }
+.brand-sub {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; color: var(--muted); letter-spacing: .04em;
+}
+.auth { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.auth-user {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px; color: var(--muted);
+}
+
+/* ---------------- Tlačítka ---------------- */
+.btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.08); color: var(--accent-ink); }
+.btn-sm { padding: 5px 10px; font-size: 13px; }
+
+/* ---------------- Stránka ---------------- */
+.page { max-width: 1000px; margin: 0 auto; padding: 26px 20px 60px; }
+section { margin-bottom: 34px; }
+h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+h2 { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
+h3.sub { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
+
+/* ---------------- Dnes ---------------- */
+.today {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.today-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.today-date {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12.5px; color: var(--muted); margin: 0;
+}
+.today-lead { color: var(--ink-2); font-size: 15px; margin: 8px 0 18px; max-width: 62ch; }
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.tile {
+  border: 1px solid var(--line-strong);
+  border-top-width: 4px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 108px;
+}
+.tile-kod {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px; font-weight: 600; letter-spacing: .1em;
+}
+.tile-stav { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.tile-detail {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11.5px; margin-top: auto; opacity: .85;
+}
+.tile--free { background: var(--free-bg); border-color: var(--free-line); color: var(--free); }
+.tile--res  { background: var(--hold-bg); border-color: var(--hold-line); color: var(--hold); }
+.tile--off  { background: var(--surface-2); border-color: var(--line-strong); color: var(--muted); }
+
+.today-verdict {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  font-size: 15.5px;
+  font-weight: 500;
+  border-left: 4px solid var(--line-strong);
+  background: var(--surface-2);
+}
+.verdict--ok { border-left-color: var(--free-line); color: var(--free); background: var(--free-bg); }
+.verdict--warn { border-left-color: var(--hold-line); color: var(--hold); background: var(--hold-bg); }
+.verdict--stop { border-left-color: var(--stop); color: var(--stop); background: var(--stop-bg); }
+
+/* ---------------- Týdenní mřížka ---------------- */
+.board {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.board-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.board-range {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px; color: var(--muted); margin: 0;
+}
+.weeknav { display: flex; gap: 6px; }
+
+.grid-scroll { overflow-x: auto; }
+.grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(78px, 1fr));
+  gap: 4px;
+  min-width: 620px;
+}
+.g-hd {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); text-align: center; padding: 2px 0 6px;
+}
+.g-hd.g-corner { text-align: left; }
+.g-hd.g-dnes { color: var(--accent); font-weight: 600; }
+.g-row {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12.5px; font-weight: 600;
+  display: flex; align-items: center;
+}
+.cell {
+  border: 1px solid var(--line);
+  padding: 7px 6px;
+  min-height: 54px;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  font-size: 11.5px;
+}
+.cell b { font-weight: 600; font-size: 12px; }
+.cell small {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px; opacity: .85;
+}
+.cell--free { background: var(--free-bg); border-color: var(--free-line); color: var(--free); }
+.cell--res  { background: var(--hold-bg); border-color: var(--hold-line); color: var(--hold); }
+.cell--off  { background: var(--surface-2); border-color: var(--line-strong); color: var(--muted); }
+.cell--wknd { background: transparent; border-style: dashed; color: var(--muted); }
+.cell--today { box-shadow: inset 0 0 0 2px var(--accent); }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px 20px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; color: var(--muted);
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line);
+}
+.lg { width: 11px; height: 11px; display: inline-block; margin-right: 6px; vertical-align: -1px; border: 1px solid; }
+.lg-free { background: var(--free-bg); border-color: var(--free-line); }
+.lg-res  { background: var(--hold-bg); border-color: var(--hold-line); }
+.lg-off  { background: var(--surface-2); border-color: var(--line-strong); }
+
+/* ---------------- Panel rezervace ---------------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.panel-lead { color: var(--ink-2); font-size: 14.5px; margin: 0 0 16px; }
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+}
+.field select, .field input {
+  font-family: inherit; font-size: 14.5px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 38px;
+}
+.field select:focus, .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.msg { font-size: 14px; margin: 12px 0 0; min-height: 20px; color: var(--muted); }
+.msg--ok { color: var(--free); }
+.msg--warn { color: var(--hold); }
+.msg--err { color: var(--stop); }
+
+.mine { display: flex; flex-direction: column; }
+.mine-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.mine-row:last-child { border-bottom: 0; }
+.mine-info { display: flex; flex-direction: column; }
+.mine-datum { font-size: 14.5px; font-weight: 500; }
+.mine-detail {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11.5px; color: var(--muted);
+}
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* ---------------- Pravidla ---------------- */
+.rules {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  padding: 18px 22px;
+}
+.rulelist { margin: 10px 0 0; padding-left: 20px; color: var(--ink-2); font-size: 14.5px; max-width: 70ch; }
+.rulelist li { margin-bottom: 7px; }
+
+/* ---------------- Patička ---------------- */
+.foot {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px 20px 40px;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 6px 24px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; color: var(--muted);
+}
+
+/* ---------------- Dialog ---------------- */
+.dlg {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0;
+  max-width: 420px;
+  width: calc(100% - 40px);
+  box-shadow: var(--shadow);
+}
+.dlg::backdrop { background: rgba(10,14,20,.55); }
+.dlg-in { padding: 22px; }
+.dlg-in h2 { margin-bottom: 8px; }
+.dlg-in p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 16px; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+@media (max-width: 560px) {
+  .topbar-in { flex-direction: column; align-items: flex-start; }
+  .auth { justify-content: flex-start; }
+  .today, .board, .panel { padding: 16px; }
+  h1 { font-size: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
