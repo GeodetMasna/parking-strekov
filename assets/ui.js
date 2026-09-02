@@ -76,8 +76,17 @@ window.PARK.ui = (function () {
     };
   }
 
-  /* ---------- Týdenní mřížka ---------- */
-  function mrizka(kontejner, dny, mista, rezervace) {
+  /* ----------------------------------------------------------
+     Týdenní mřížka.
+     opts (nepovinné):
+       email        e-mail přihlášeného — jeho rezervace se odliší
+       vikendy      lze rezervovat i o víkendu?
+       onKlik(mistoKod, datum, rezervaceNeboNull)
+                    když je předán, volné buňky a vlastní rezervace
+                    se stanou klikatelnými
+     ---------------------------------------------------------- */
+  function mrizka(kontejner, dny, mista, rezervace, opts) {
+    opts = opts || {};
     kontejner.innerHTML = '';
     var dnesek = util.dnes();
 
@@ -95,17 +104,41 @@ window.PARK.ui = (function () {
       dny.forEach(function (d) {
         var s = stav(m, rezervace, d);
         var vikend = util.jeVikend(d);
+        var r = rezervaceProDen(rezervace, m.kod, d);
+        var moje = !!(r && opts.email && r.ridic_email === opts.email);
+
         var bunka = el('div', 'cell cell--' + (vikend && s === 'free' ? 'wknd' : s));
         if (d === dnesek) bunka.classList.add('cell--today');
+        if (moje) bunka.classList.add('cell--moje');
 
         var popis = s === 'off' ? 'Mimo provoz'
-                  : (s === 'res' ? 'Rezervováno' : (vikend ? 'Víkend' : 'Volné'));
+                  : (s === 'res' ? (moje ? 'Moje rezervace' : 'Rezervováno')
+                                 : (vikend ? 'Víkend' : 'Volné'));
         bunka.appendChild(el('b', null, popis));
-
-        var r = rezervaceProDen(rezervace, m.kod, d);
         if (r && r.spz) bunka.appendChild(el('small', null, r.spz));
 
-        bunka.setAttribute('aria-label', m.kod + ' ' + util.kratkyDen(d) + ': ' + popis);
+        // Klikat lze na volné stání a na vlastní rezervaci (ta se klikem ruší).
+        // Ne do minulosti, ne na stání mimo provoz, ne o víkendu, když je vypnutý.
+        var lzeKliknout = !!opts.onKlik && s !== 'off' && d >= dnesek
+                          && (opts.vikendy || !vikend)
+                          && (s === 'free' || moje);
+
+        if (lzeKliknout) {
+          bunka.classList.add('cell--klik');
+          bunka.setAttribute('role', 'button');
+          bunka.tabIndex = 0;
+          var akce = function () { opts.onKlik(m.kod, d, moje ? r : null); };
+          bunka.addEventListener('click', akce);
+          bunka.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); akce(); }
+          });
+          bunka.title = moje ? 'Kliknutím rezervaci zrušíte'
+                             : 'Kliknutím stání rezervujete';
+        }
+
+        bunka.setAttribute('aria-label',
+          m.kod + ' ' + util.kratkyDen(d) + ': ' + popis +
+          (lzeKliknout ? (moje ? ' — kliknutím zrušíte' : ' — kliknutím rezervujete') : ''));
         kontejner.appendChild(bunka);
       });
     });

@@ -44,5 +44,5 @@ window.PARK.config = {
   NOTIFIKACE_DNU_DOPREDU: 2,
 
   // Adresa webu do textu mailu (odkaz na přehled obsazenosti)
-  ADRESA_WEBU: 'https://parking-strekov.netlify.app'
+  ADRESA_WEBU: 'https://geodetmasna.github.io/parking-strekov'
 };

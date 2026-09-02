@@ -54,7 +54,12 @@
     vEl.className = 'today-verdict verdict--' + v.typ;
 
     $('weekRange').textContent = util.rozsahTydne(dny) + ' · týden ' + util.cisloTydne(dny[0]);
-    ui.mrizka($('grid'), dny, stav.mista, stav.rezervace);
+    $('boardHint').hidden = !stav.uzivatel;
+    ui.mrizka($('grid'), dny, stav.mista, stav.rezervace, {
+      email: stav.uzivatel ? stav.uzivatel.email : null,
+      vikendy: cfg.POVOLIT_VIKENDY,
+      onKlik: stav.uzivatel ? klikNaBunku : null
+    });
 
     vykresliAuth();
     if (stav.uzivatel) {
@@ -137,31 +142,61 @@
 
   /* ---------------- Akce ---------------- */
 
+  /** Formulář — sestaví seznam dnů a předá je společné rezervační funkci. */
   function rezervuj(e) {
     e.preventDefault();
-    var vozidloId = $('selVozidlo').value;
-    var mistoKod = $('selMisto').value;
     var odDne = $('inpDatum').value;
-    var pocet = Number($('selRozsah').value);
     if (!odDne) return;
+    var pocet = Number($('selRozsah').value);
 
-    // Limit počtu aktivních budoucích rezervací
-    var mych = stav.rezervace.filter(function (r) {
-      return r.ridic_email === stav.uzivatel.email && r.datum >= util.dnes();
-    }).length;
-    if (mych + pocet > cfg.MAX_REZERVACI_NA_OSOBU) {
-      hlaska($('msgRezervace'),
-        'Limit je ' + cfg.MAX_REZERVACI_NA_OSOBU + ' aktivních rezervací a máte jich ' + mych +
-        '. Nejdřív některou zrušte.', 'err');
-      return;
-    }
-
-    // Sestavení seznamu dnů — víkendy se přeskočí, pokud nejsou povolené
+    // Víkendy se přeskočí, pokud nejsou povolené
     var dny = [], d = odDne, pridano = 0, pojistka = 0;
     while (pridano < pocet && pojistka < 30) {
       if (cfg.POVOLIT_VIKENDY || !util.jeVikend(d)) { dny.push(d); pridano++; }
       d = util.pridej(d, 1);
       pojistka++;
+    }
+    rezervujDny(dny, $('selMisto').value, $('selVozidlo').value);
+  }
+
+  /** Klik do mřížky: volné stání rezervuje, vlastní rezervaci ruší. */
+  function klikNaBunku(mistoKod, datum, mojeRezervace) {
+    if (!stav.uzivatel) return;
+
+    if (mojeRezervace) {
+      if (window.confirm('Zrušit rezervaci stání ' + mistoKod + ' na ' + util.dlouhyDen(datum) + '?')) {
+        zrus(mojeRezervace.id);
+      }
+      return;
+    }
+
+    var vozidloId = $('selVozidlo').value;
+    if (!vozidloId) {
+      hlaska($('msgRezervace'), 'Nejdřív vyberte vozidlo v panelu níže.', 'err');
+      return;
+    }
+    // Formulář se srovná s tím, na co se kliklo — je pak vidět kontext
+    $('selMisto').value = mistoKod;
+    $('inpDatum').value = datum;
+    rezervujDny([datum], mistoKod, vozidloId);
+  }
+
+  /** Uloží rezervace na zadané dny. Používá formulář i klik do mřížky. */
+  function rezervujDny(dny, mistoKod, vozidloId) {
+    if (!dny.length) return;
+
+    var vozidlo = stav.vozidla.filter(function (v) { return v.id === vozidloId; })[0];
+    var spz = vozidlo ? vozidlo.spz : '';
+
+    // Limit počtu aktivních budoucích rezervací
+    var mych = stav.rezervace.filter(function (r) {
+      return r.ridic_email === stav.uzivatel.email && r.datum >= util.dnes();
+    }).length;
+    if (mych + dny.length > cfg.MAX_REZERVACI_NA_OSOBU) {
+      hlaska($('msgRezervace'),
+        'Limit je ' + cfg.MAX_REZERVACI_NA_OSOBU + ' aktivních rezervací a máte jich ' + mych +
+        '. Nejdřív některou zrušte.', 'err');
+      return;
     }
 
     hlaska($('msgRezervace'), 'Ukládám…', '');
@@ -181,16 +216,21 @@
     }, Promise.resolve())
       .then(function () {
         var obsazene = vysledek.obsazeno.map(util.denMesic).join(', ');
+        var vozem = spz ? ' pro ' + spz : '';
         var t, typ;
         if (vysledek.ok === 0) {
           t = 'Stání ' + mistoKod + ' je už rezervované: ' + obsazene + ' Vyberte jiné stání nebo den.';
           typ = 'err';
         } else if (vysledek.obsazeno.length) {
-          t = 'Zarezervováno: ' + vysledek.ok + ' ' + sklonuj(vysledek.ok) +
-              '. Obsazeno už bylo: ' + obsazene;
+          t = 'Zarezervováno stání ' + mistoKod + vozem + ' na ' + vysledek.ok + ' ' +
+              sklonuj(vysledek.ok) + '. Obsazeno už bylo: ' + obsazene;
           typ = 'warn';
+        } else if (vysledek.ok === 1) {
+          t = 'Zarezervováno: ' + mistoKod + ', ' + util.dlouhyDen(vysledek.ulozene[0]) + vozem + '.';
+          typ = 'ok';
         } else {
-          t = 'Zarezervováno: ' + vysledek.ok + ' ' + sklonuj(vysledek.ok) + '.';
+          t = 'Zarezervováno stání ' + mistoKod + vozem + ' na ' + vysledek.ok + ' ' +
+              sklonuj(vysledek.ok) + '.';
           typ = 'ok';
         }
         hlaska($('msgRezervace'), t, typ);

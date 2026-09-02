@@ -195,6 +195,7 @@ h3.sub { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 12px; color: var(--muted); margin: 0;
 }
+.board-hint { font-size: 13.5px; color: var(--accent); margin: 6px 0 0; }
 .weeknav { display: flex; gap: 6px; }
 
 .grid-scroll { overflow-x: auto; }
@@ -233,6 +234,15 @@ h3.sub { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
 .cell--off  { background: var(--surface-2); border-color: var(--line-strong); color: var(--muted); }
 .cell--wknd { background: transparent; border-style: dashed; color: var(--muted); }
 .cell--today { box-shadow: inset 0 0 0 2px var(--accent); }
+/* Vlastní rezervace — pruh na levé hraně */
+.cell--moje { border-left: 4px solid var(--accent); }
+/* Buňka, na kterou lze kliknout */
+.cell--klik { cursor: pointer; }
+.cell--klik:hover { filter: brightness(0.96); border-color: var(--accent); }
+.cell--klik:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cell--klik:hover { filter: brightness(1.25); }
+}
 
 .legend {
   display: flex; flex-wrap: wrap; gap: 8px 20px;
