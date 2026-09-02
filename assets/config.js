@@ -15,8 +15,8 @@
 window.PARK = window.PARK || {};
 
 window.PARK.config = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  SUPABASE_URL: 'https://pmleheimqnhqpscapuhe.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_5HO1Nh49A-pn7KloCo-D0Q_VMwuhxkC',
 
   // Kolik dnů dopředu lze rezervovat
   HORIZONT_DNU: 21,
