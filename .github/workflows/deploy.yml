@@ -1,0 +1,62 @@
+# =============================================================
+#  Nasazení na GitHub Pages po každém pushi do větve main.
+#
+#  Na web se dostane jen obsah složky dist/, kterou tento
+#  workflow sestaví. Složky supabase/ a docs/ zůstávají v
+#  repozitáři, ale na web nejdou.
+#
+#  Jednorázové nastavení v repozitáři:
+#    Settings → Pages → Source: GitHub Actions
+# =============================================================
+name: Nasazení na GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # umožní spustit ručně z záložky Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sestavení složky dist
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          cp -r assets dist/
+          touch dist/.nojekyll
+          echo "Na web půjdou tyto soubory:"
+          find dist -type f | sort
+
+      - name: Kontrola, že se na web nedostala citlivá data
+        run: |
+          if find dist -name "*.sql" -o -name "*.md" | grep -q .; then
+            echo "CHYBA: ve složce dist jsou SQL nebo MD soubory."
+            exit 1
+          fi
+          echo "OK — žádné SQL ani dokumentace."
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
