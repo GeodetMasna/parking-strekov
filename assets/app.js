@@ -55,6 +55,7 @@
 
     $('weekRange').textContent = util.rozsahTydne(dny) + ' · týden ' + util.cisloTydne(dny[0]);
     $('boardHint').hidden = !stav.uzivatel;
+    $('todayActions').hidden = !stav.uzivatel;
     ui.mrizka($('grid'), dny, stav.mista, stav.rezervace, {
       email: stav.uzivatel ? stav.uzivatel.email : null,
       vikendy: cfg.POVOLIT_VIKENDY,
@@ -313,6 +314,65 @@
     return 'Přihlášení selhalo: ' + (t || 'neznámá chyba');
   }
 
+  /** Otevře dialog hlášení a předvyplní stání podle dnešní rezervace uživatele. */
+  function otevriPoruseni() {
+    var sel = $('selPoruseniMisto');
+    sel.innerHTML = '';
+    stav.mista.forEach(function (m) {
+      var o = document.createElement('option');
+      o.value = m.kod;
+      o.textContent = m.kod + (m.popis ? ' — ' + m.popis : '');
+      sel.appendChild(o);
+    });
+
+    // Nejpravděpodobnější případ: obsazené je moje dnešní stání
+    var moje = stav.rezervace.filter(function (r) {
+      return r.datum === util.dnes() && r.ridic_email === stav.uzivatel.email;
+    })[0];
+    if (moje) sel.value = moje.misto_kod;
+
+    hlaska($('msgPoruseni'), '', '');
+    $('dlgPoruseni').showModal();
+  }
+
+  function odesliPoruseni() {
+    var spz = $('inpPoruseniSpz').value.trim();
+    var pozn = $('inpPoruseniPopis').value.trim();
+    var casti = [];
+    if (spz) casti.push('SPZ ' + spz);
+    if (pozn) casti.push(pozn);
+
+    var zaznam = {
+      datum: util.dnes(),
+      misto_kod: $('selPoruseniMisto').value,
+      popis: casti.length ? casti.join(' — ') : 'Bez bližšího popisu',
+      nahlasil: stav.uzivatel.email
+    };
+
+    hlaska($('msgPoruseni'), 'Ukládám…', '');
+    data.nahlasPoruseni(zaznam).then(function () {
+      $('inpPoruseniSpz').value = '';
+      $('inpPoruseniPopis').value = '';
+      $('dlgPoruseni').close();
+      hlaska($('msgRezervace'), 'Hlášení uloženo do evidence.', 'ok');
+
+      if (!window.PARK.notify.jeNastaveno()) return;
+      return data.nactiSpravce().then(function (spravci) {
+        return window.PARK.notify.nahlaseniPoruseni(zaznam, spravci);
+      }).then(function (v) {
+        if (v && v.odeslano) {
+          hlaska($('msgRezervace'), 'Hlášení uloženo a odesláno správci.', 'ok');
+        } else if (v && v.chyba) {
+          hlaska($('msgRezervace'),
+            'Hlášení je uložené v evidenci, ale mail správci neodešel — dejte mu vědět jinak.', 'warn');
+        }
+      });
+    }).catch(function (e) {
+      console.error(e);
+      hlaska($('msgPoruseni'), 'Hlášení se nepodařilo uložit: ' + (e.message || e), 'err');
+    });
+  }
+
   function ulozNoveHeslo() {
     var a = $('inpNoveHeslo').value, b = $('inpNoveHeslo2').value;
     if (a.length < 8) {
@@ -355,6 +415,9 @@
     $('formRezervace').addEventListener('submit', rezervuj);
     $('btnOdeslat').addEventListener('click', odesliPrihlaseni);
     $('btnUlozHeslo').addEventListener('click', ulozNoveHeslo);
+    $('btnPoruseni').addEventListener('click', otevriPoruseni);
+    $('btnOdeslatPoruseni').addEventListener('click', odesliPoruseni);
+    naEnter(['inpPoruseniSpz', 'inpPoruseniPopis'], odesliPoruseni);
     $('btnPrihlasit').addEventListener('click', function () { $('dlgLogin').showModal(); });
 
     // Enter v poli dialogu potvrdí akci místo zavření dialogu

@@ -34,6 +34,7 @@ window.PARK.data = (function () {
       { id: 'v3', spz: '5U9 4471', model: 'Škoda Superb iV' }
     ],
     rezervace: [],
+    poruseni: [],
     drzitele: [
       { email: 'kolega1@strabag.com', jmeno: 'Kolega Jedna', aktivni: true },
       { email: 'kolega2@strabag.com', jmeno: 'Kolega Dva',   aktivni: true }
@@ -199,6 +200,30 @@ window.PARK.data = (function () {
     }).then(function (r) { if (r.error) throw r.error; });
   }
 
+  /** Zapíše nahlášené porušení do evidence. */
+  function nahlasPoruseni(zaznam) {
+    if (jeDemo) {
+      demo.poruseni.push(zaznam);
+      return Promise.resolve();
+    }
+    return sb.from('poruseni').insert({
+      datum: zaznam.datum,
+      misto_kod: zaznam.misto_kod,
+      popis: zaznam.popis,
+      nahlasil: zaznam.nahlasil
+    }).then(function (r) { if (r.error) throw r.error; });
+  }
+
+  /** Správci — adresáti hlášení o porušení. */
+  function nactiSpravce() {
+    if (jeDemo) return Promise.resolve([{ email: 'spravce@strabag.com', jmeno: 'Správce' }]);
+    return sb.from('ridici').select('email,jmeno').eq('spravce', true).eq('aktivni', true)
+      .then(function (r) {
+        if (r.error) { console.warn('Seznam správců se nenačetl:', r.error); return []; }
+        return r.data;
+      });
+  }
+
   function zrusRezervaci(id) {
     if (jeDemo) {
       demo.rezervace.forEach(function (r) { if (r.id === id) r.stav = 'zrusena'; });
@@ -221,6 +246,8 @@ window.PARK.data = (function () {
     nactiVozidla: nactiVozidla,
     nactiDrziteleCipu: nactiDrziteleCipu,
     vytvorRezervaci: vytvorRezervaci,
-    zrusRezervaci: zrusRezervaci
+    zrusRezervaci: zrusRezervaci,
+    nahlasPoruseni: nahlasPoruseni,
+    nactiSpravce: nactiSpravce
   };
 })();

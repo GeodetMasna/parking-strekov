@@ -39,6 +39,9 @@
     <p class="today-lead">Řidiči vozidel se spalovacím motorem smí zaparkovat pouze na stání, které dnes <strong>nemá rezervaci</strong>.</p>
     <div class="tiles" id="tiles" role="list" aria-label="Stav stání dnes"></div>
     <p class="today-verdict" id="todayVerdict">—</p>
+    <div class="today-actions" id="todayActions" hidden>
+      <button class="btn btn-ghost btn-sm" id="btnPoruseni" type="button">Stání někdo obsadil</button>
+    </div>
   </section>
 
   <!-- ---------- TÝDENNÍ MŘÍŽKA ---------- -->
@@ -132,6 +135,31 @@
     <div class="dlg-actions">
       <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Zavřít</button>
       <button class="btn btn-primary" id="btnOdeslat" type="button">Přihlásit se</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Nahlášení porušení -->
+<dialog id="dlgPoruseni" class="dlg">
+  <form method="dialog" class="dlg-in" id="formPoruseni">
+    <h2>Stání někdo obsadil</h2>
+    <p>Záznam se uloží do evidence a odejde správci parkoviště. Vyplňte, co víte — SPZ pomůže nejvíc.</p>
+    <label class="field">
+      <span>Které stání</span>
+      <select id="selPoruseniMisto" required></select>
+    </label>
+    <label class="field">
+      <span>SPZ vozidla, které tam stojí</span>
+      <input type="text" id="inpPoruseniSpz" placeholder="např. 1AB 2345" autocomplete="off">
+    </label>
+    <label class="field">
+      <span>Poznámka</span>
+      <input type="text" id="inpPoruseniPopis" placeholder="nepovinné" maxlength="200" autocomplete="off">
+    </label>
+    <p class="msg" id="msgPoruseni" role="status"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Zavřít</button>
+      <button class="btn btn-primary" id="btnOdeslatPoruseni" type="button">Nahlásit</button>
     </div>
   </form>
 </dialog>

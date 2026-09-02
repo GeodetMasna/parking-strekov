@@ -55,6 +55,9 @@
 
 * { box-sizing: border-box; }
 
+/* Atribut hidden musí přebít i vlastní display (flex, grid) níže v souboru. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--ground);
@@ -179,6 +182,8 @@ h3.sub { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
 .verdict--ok { border-left-color: var(--free-line); color: var(--free); background: var(--free-bg); }
 .verdict--warn { border-left-color: var(--hold-line); color: var(--hold); background: var(--hold-bg); }
 .verdict--stop { border-left-color: var(--stop); color: var(--stop); background: var(--stop-bg); }
+
+.today-actions { margin-top: 12px; display: flex; justify-content: flex-end; }
 
 /* ---------------- Týdenní mřížka ---------------- */
 .board {

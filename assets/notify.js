@@ -78,5 +78,46 @@ window.PARK.notify = (function () {
     });
   }
 
-  return { novaRezervace: novaRezervace, jeNastaveno: jeNastaveno };
+  /**
+   * Hlášení o obsazeném stání správcům parkoviště.
+   * @param {object}   zaznam   { datum, misto_kod, popis, nahlasil }
+   * @param {object[]} spravci  [{ email }]
+   */
+  function nahlaseniPoruseni(zaznam, spravci) {
+    init();
+    if (!pripraveno) return Promise.resolve({ preskoceno: 'EmailJS není nastaven' });
+
+    var adresy = (spravci || []).map(function (s) { return s.email; }).filter(Boolean);
+    if (adresy.length === 0) return Promise.resolve({ preskoceno: 'žádní správci' });
+
+    var zprava =
+      'Nahlášeno obsazené stání.\n\n' +
+      'Datum: ' + util.dlouhyDen(zaznam.datum) + '\n' +
+      'Stání: ' + zaznam.misto_kod + '\n' +
+      'Nahlásil: ' + zaznam.nahlasil + '\n' +
+      'Popis: ' + (zaznam.popis || '—') + '\n\n' +
+      'Záznam je uložený v evidenci porušení.\n' +
+      (cfg.ADRESA_WEBU || '');
+
+    return window.emailjs.send(cfg.EMAILJS_SERVICE_ID, cfg.EMAILJS_TEMPLATE_ID, {
+      to_email: adresy.join(','),
+      predmet: 'Parkování Střekov — obsazené stání ' + zaznam.misto_kod +
+               ' (' + util.denMesic(zaznam.datum) + ')',
+      stani: zaznam.misto_kod,
+      dny: util.denMesic(zaznam.datum),
+      zprava: zprava,
+      odkaz: cfg.ADRESA_WEBU || ''
+    }).then(function () {
+      return { odeslano: adresy.length };
+    }).catch(function (e) {
+      console.warn('Hlášení se nepodařilo odeslat:', e);
+      return { chyba: (e && (e.text || e.message)) || 'neznámá chyba' };
+    });
+  }
+
+  return {
+    novaRezervace: novaRezervace,
+    nahlaseniPoruseni: nahlaseniPoruseni,
+    jeNastaveno: jeNastaveno
+  };
 })();
